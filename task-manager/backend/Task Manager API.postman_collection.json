@@ -1,0 +1,1167 @@
+{
+  "info": {
+    "_postman_id": "6f947fa8-9ea9-4fae-bb52-abe587c2f962",
+    "name": "Task Manager API (new)",
+    "description": "개인/팀 작업 관리 시스템 API Collection\n\n⚠️ 중요: userId, taskId, projectId 등의 동적 파라미터는 매번 API 응답에서 복사해서 Path Variables에 입력하세요. Collection Variables에 저장하지 마세요.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "37428602"
+  },
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "회원가입",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "signup"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "로그인",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "",
+                  "    const body = pm.response.json();",
+                  "",
+                  "    pm.environment.set('accessToken', body.accessToken);",
+                  "    pm.environment.set('refreshToken', body.refreshToken);",
+                  "    ",
+                  "    // userId는 응답에서 확인하고 수동으로 기록하세요",
+                  "    console.log('🔑 사용자 ID:', body.userId);",
+                  "    console.log('📝 이 값을 복사해서 필요한 API 요청의 Path Variables에 입력하세요');",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"wukddang\",\n    \"password\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Workspace Setup",
+      "item": [
+        {
+          "name": "워크스페이스 생성",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('🏢 워크스페이스 ID:', response._id || response.id);",
+                  "    console.log('📝 이 값을 복사해서 프로젝트 생성 시 Path Variables의 workspaceId에 입력하세요');",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"개인 워크스페이스\",\n  \"description\": \"개인 프로젝트 관리용\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/workspaces",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "워크스페이스 목록 조회",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/workspaces",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Project Setup",
+      "item": [
+        {
+          "name": "프로젝트 생성",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('📁 프로젝트 ID:', response._id || response.id);",
+                  "    console.log('📝 이 값을 복사해서 보드 생성 시 Path Variables의 projectId에 입력하세요');",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workspaceId\": \":workspaceId\",\n  \"name\": \"웹사이트 리뉴얼\",\n  \"description\": \"회사 홈페이지 리뉴얼 프로젝트\",\n  \"leadUserId\": \":userId\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/projects",
+              "host": ["{{baseUrl}}"],
+              "path": ["projects"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "보드 생성",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('📋 보드 ID:', response._id || response.id);",
+                  "    console.log('📝 이 값을 복사해서 리스트 생성 시 Path Variables의 boardId에 입력하세요');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"projectId\": \":projectId\",\n  \"name\": \"개발 보드\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/boards",
+              "host": ["{{baseUrl}}"],
+              "path": ["boards"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "프로젝트 조회",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/projects",
+              "host": ["{{baseUrl}}"],
+              "path": ["projects"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "🎯 프로젝트 멤버 초대 (이벤트 테스트)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Project invite triggers event\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    console.log('✅ 프로젝트 멤버 초대 완료 - 이벤트 발행 확인');",
+                  "    console.log('📝 서버 로그에서 다음 메시지들을 확인하세요:');",
+                  "    console.log('   [EVENT] project.invite event emitted');",
+                  "    console.log('   [NOTIFICATION] Processing project invite event');",
+                  "    console.log('   [EMAIL] Project invite email sent');",
+                  "    console.log('   [WEBSOCKET] Real-time notification sent');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \":inviteUserId\",\n  \"role\": \"member\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/projects/:projectId/members",
+              "host": ["{{baseUrl}}"],
+              "path": ["projects", ":projectId", "members"],
+              "variable": [
+                {
+                  "key": "projectId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Board Lists (Kanban Columns)",
+      "item": [
+        {
+          "name": "할 일 리스트 생성",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('📝 할 일 리스트 ID:', response._id || response.id);",
+                  "    console.log('📝 이 값을 복사해서 작업 생성 시 Path Variables의 listId에 입력하세요');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"boardId\": \":boardId\",\n  \"name\": \"할 일\",\n  \"orderIndex\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lists",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "진행 중 리스트 생성",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('🔄 진행 중 리스트 ID:', response._id || response.id);",
+                  "    console.log('📝 이 값을 복사해서 필요시 사용하세요');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"boardId\": \":boardId\",\n  \"name\": \"진행 중\",\n  \"orderIndex\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lists",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "완료 리스트 생성",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ 완료 리스트 ID:', response._id || response.id);",
+                  "    console.log('📝 이 값을 복사해서 필요시 사용하세요');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"boardId\": \":boardId\",\n  \"name\": \"완료\",\n  \"orderIndex\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lists",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Labels",
+      "item": [
+        {
+          "name": "긴급 레이블 생성",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('🏷️ 레이블 ID:', response._id || response.id);",
+                  "    console.log('📝 이 값을 복사해서 작업 생성 시 Path Variables의 labelId에 입력하세요');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"projectId\": \":projectId\",\n  \"name\": \"긴급\",\n  \"color\": \"#ff4444\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/labels",
+              "host": ["{{baseUrl}}"],
+              "path": ["labels"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "레이블 목록 조회",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/labels/project/:projectId",
+              "host": ["{{baseUrl}}"],
+              "path": ["labels", "project", ":projectId"],
+              "variable": [
+                {
+                  "key": "projectId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Tasks Management",
+      "item": [
+        {
+          "name": "작업 생성",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ 작업 ID:', response._id || response.id);",
+                  "    console.log('📝 이 값을 복사해서 작업 할당, 댓글 추가 등에 Path Variables의 taskId에 입력하세요');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"listId\": \":todoListId\",\n  \"title\": \"로그인 API 개발\",\n  \"description\": \"JWT 기반 로그인 기능 구현\",\n  \"dueDate\": \"2024-02-15T09:00:00Z\",\n  \"creatorId\": \":userId\",\n  \"assigneeIds\": [\":userId\"],\n  \"labelIds\": [\":labelId\"],\n  \"priority\": \"high\",\n  \"status\": \"todo\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "🎯 작업 할당 (이벤트 테스트)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Task assignment triggers event\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    console.log('✅ 작업 할당 완료 - 이벤트 발행 확인');",
+                  "    console.log('📝 서버 로그에서 다음 메시지들을 확인하세요:');",
+                  "    console.log('   [EVENT] task.assigned event emitted');",
+                  "    console.log('   [NOTIFICATION] Processing task assigned event');",
+                  "    console.log('   [EMAIL] Task assignment email sent');",
+                  "    console.log('   [WEBSOCKET] Real-time notification sent');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assigneeId\": \":assigneeId\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks/:taskId/assign",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", ":taskId", "assign"],
+              "variable": [
+                {
+                  "key": "taskId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "하위 작업 생성",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('🔗 하위 작업 ID:', response._id || response.id);",
+                  "    console.log('📝 이 값을 복사해서 필요시 사용하세요');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"JWT 토큰 생성 로직\",\n  \"description\": \"JWT 토큰 생성 및 검증 로직 구현\",\n  \"creatorId\": \":userId\",\n  \"priority\": \"medium\",\n  \"status\": \"todo\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks/:taskId/subtasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", ":taskId", "subtasks"],
+              "variable": [
+                {
+                  "key": "taskId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "작업 상태 변경 (진행 중)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in-progress\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks/:taskId/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", ":taskId", "status"],
+              "variable": [
+                {
+                  "key": "taskId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "🎯 작업 상태 변경 (완료) - 이벤트 테스트",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Task completion triggers event\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    console.log('✅ 작업 완료 - 이벤트 발행 확인');",
+                  "    console.log('📝 서버 로그에서 다음 메시지들을 확인하세요:');",
+                  "    console.log('   [EVENT] task.completed event emitted');",
+                  "    console.log('   [NOTIFICATION] Processing task completed event');",
+                  "    console.log('   [WEBSOCKET] Real-time notification sent');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"done\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks/:taskId/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", ":taskId", "status"],
+              "variable": [
+                {
+                  "key": "taskId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "작업 조회 (하위작업 포함)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/:taskId/with-subtasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", ":taskId", "with-subtasks"],
+              "variable": [
+                {
+                  "key": "taskId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "작업 진행률 조회",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/:taskId/progress",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", ":taskId", "progress"],
+              "variable": [
+                {
+                  "key": "taskId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7. Comments",
+      "item": [
+        {
+          "name": "🎯 댓글 추가 (이벤트 테스트)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('💬 댓글 ID:', response._id || response.id);",
+                  "    console.log('✅ 댓글 추가 완료 - 이벤트 발행 확인');",
+                  "    console.log('📝 서버 로그에서 다음 메시지들을 확인하세요:');",
+                  "    console.log('   [EVENT] comment.added event emitted');",
+                  "    console.log('   [NOTIFICATION] Processing comment added event');",
+                  "    console.log('   [WEBSOCKET] Real-time notification sent');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"taskId\": \":taskId\",\n  \"userId\": \":userId\",\n  \"content\": \"작업을 시작했습니다! JWT 구현 중입니다.\",\n  \"projectId\": \":projectId\",\n  \"taskTitle\": \"로그인 API 개발\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "작업별 댓글 조회",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/task/:taskId",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "task", ":taskId"],
+              "variable": [
+                {
+                  "key": "taskId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "댓글 통계",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/task/:taskId/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "task", ":taskId", "stats"],
+              "variable": [
+                {
+                  "key": "taskId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "8. Search & Calendar",
+      "item": [
+        {
+          "name": "작업 검색",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/search?q=로그인&userId=:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "로그인"
+                },
+                {
+                  "key": "userId",
+                  "value": ":userId"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "오늘 마감 작업",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/calendar/tasks/today?userId=:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["calendar", "tasks", "today"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": ":userId"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "다가오는 작업 (7일)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/calendar/tasks/upcoming?userId=:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["calendar", "tasks", "upcoming"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": ":userId"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "월별 작업 조회",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/calendar/tasks/month?year=2024&month=2&userId=:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["calendar", "tasks", "month"],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2024"
+                },
+                {
+                  "key": "month",
+                  "value": "2"
+                },
+                {
+                  "key": "userId",
+                  "value": ":userId"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "9. Dashboard & Analytics",
+      "item": [
+        {
+          "name": "사용자 대시보드",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/user/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "user", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "프로젝트 대시보드",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/project/:projectId",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "project", ":projectId"],
+              "variable": [
+                {
+                  "key": "projectId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "사용자 통계",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/user/:userId/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "user", ":userId", "stats"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "생산성 지표",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/user/:userId/productivity",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "user", ":userId", "productivity"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10. Notifications",
+      "item": [
+        {
+          "name": "읽지 않은 알림",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/user/:userId/unread",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "user", ":userId", "unread"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "읽지 않은 알림 수",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/user/:userId/unread-count",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "user", ":userId", "unread-count"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "모든 알림 읽음 처리",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/user/:userId/read-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "user", ":userId", "read-all"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🎯 Event System Testing",
+      "item": [
+        {
+          "name": "이벤트 시스템 상태 확인",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "WebSocket 연결 테스트용 정보",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "console.log('🌐 WebSocket 연결 테스트 정보:');",
+                  "console.log('URL: http://localhost:3000/notifications');",
+                  "console.log('Token: ' + pm.environment.get('accessToken'));",
+                  "console.log('');",
+                  "console.log('브라우저 콘솔에서 다음 코드를 실행하세요:');",
+                  "console.log('const socket = io(\"http://localhost:3000/notifications\", {');",
+                  "console.log('  auth: { token: \"' + pm.environment.get('accessToken') + '\" }');",
+                  "console.log('});');",
+                  "console.log('socket.on(\"connect\", () => console.log(\"✅ WebSocket 연결 성공\"));');",
+                  "console.log('socket.on(\"notification\", (data) => console.log(\"🔔 실시간 알림:\", data));');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "11. Activity Logs",
+      "item": [
+        {
+          "name": "프로젝트 활동 로그",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/activity-logs/project/:projectId?limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["activity-logs", "project", ":projectId"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "projectId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "사용자 최근 활동",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/activity-logs/user/:userId/recent?limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["activity-logs", "user", ":userId", "recent"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "작업별 활동 로그",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/activity-logs/task/:taskId",
+              "host": ["{{baseUrl}}"],
+              "path": ["activity-logs", "task", ":taskId"],
+              "variable": [
+                {
+                  "key": "taskId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
